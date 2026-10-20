@@ -2,7 +2,7 @@ PROJECT TITLE: ____________
 team ID : T3
 members:
   1)Saumya Singh (2603323)
-  2)
+  2)Manjeet Banyal (2603314)
   3)
   4)
   5)
