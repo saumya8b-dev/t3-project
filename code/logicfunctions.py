@@ -17,6 +17,7 @@ def pretend_semesters(professor, miss_classes):
     classes_so_far = professor.classes_so_far
     total_classes = professor.total_classes
     m = 5 #placeholder value for number of tests/activities expected in each semester
+    #depends on the number of classes left, how strict the professor is etc
     for i in range(total_semesters):
         try:
             test_activity_days = h.random_unique(m, classes_so_far + 1, total_classes + 1)
@@ -31,9 +32,9 @@ def pretend_semesters(professor, miss_classes):
 
     risk_factor = risky_semesters/total_semesters
     print(risk_factor)
-    #actual risk threshold will not be 0.1, but dependent on other factors
+    #actual risk threshold will not be 0.1, but dependent on other factors like professor strictness and attendance frequency
     risk_threshold = 0.1
-    if risk_factor > risk_threshold:
+    if risk_factor >= risk_threshold:
         print('Too risky to miss class')
     else:
         print('Missing class is mostly safe')
