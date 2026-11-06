@@ -38,4 +38,55 @@ def pretend_semesters(professor, miss_classes):
         print('Too risky to miss class')
     else:
         print('Missing class is mostly safe')
-            
+        
+strictness = {
+    "Lenient professor":  {"m": 3, "threshold": 0.20}, #threshold-> max risk that could be taken
+    "Moderate professor": {"m": 5, "threshold": 0.10},
+    "Strict professor":   {"m": 8, "threshold": 0.05},
+}
+_levels= list(strictness)
+
+def current_attendance(attended, held):
+    return (100.0 * attended)/(held)
+    
+def risk_factor_simulation(classes_held, total_classes, leaves, m, total_semesters=1000):
+    remaining= total_classes-classes_held
+    ------ (left to be written) #risk factor
+    
+def classify_attendance_risk(p, min_p):
+    if p >= min_p:
+        return "Safe"
+    diff = min_p - p
+    if diff <= 2:
+        return "Low"        # 73-74.99 when min is 75
+    if diff <= 10:
+        return "Moderate"   # 65-72.99
+    return "High"           # below 65
+    
+def recover(attended, held, total, min_p): #no. of classes needed to recover to 75%
+    p = min_p / 100
+    remaining = total - held
+    if held == 0 or attended / held >= p:
+        return 0, True
+    if p >= 1:
+        return None, False
+    x = math.ceil((p * held - attended) / (1 - p) - 0.00000001) #subtracted so that a number like 2.000000001 doesnt get round up to 3
+    return (x, True) if x <= remaining else (x, False) #true/false to know if the student can recover from it or not
+
+def future_attendance(attended,left,leave_days,total):
+    to_attend=left-leave
+    return 100*(to_attend)/total
+
+def safe_or_risky(risk, limit,future_attendance):
+    if future_attendance<75:
+        return "Risky"
+    return "Safe"
+    
+def what_if(classes_attended, classes_held, total_classes, leave_days, tests_expected):
+    classes_left = total_classes - classes_held
+    # chance that a surprise test falls on a class you miss
+    risk = risk_factor_simulation(classes_held, total_classes, leave_days, tests_expected)
+    # attendance % at the end if you attend everything except the leave days
+    future_attendance = 100 * (classes_attended + classes_left - leave_days) / total_classes
+    return risk, future_attendance
+
