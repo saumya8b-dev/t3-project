@@ -4,7 +4,7 @@
 import logicfunctions as lf
 #strictness factor is the factor which tells how strict the professor is
 #attendance frequency is the frequency of attendance checks
-class Professor:
+class Course:
     def __init__(self, name, strictness_factor, attendance_frequency):
         self.name = name
         self.strictness_factor = strictness_factor
@@ -17,7 +17,7 @@ class Professor:
 #initialise an empty list to store the professors
 #prof1 is testing placeholder meant to be removed
 #actual value will be loaded from a csv file
-prof1 = Professor('A', 0.3, 0.5) 
-professors = [prof1]
+course1 = Course('A', 0.3, 0.5) 
+professors = [course1]
 
-lf.pretend_semesters(prof1, 1)
+lf.pretend_semesters(course1, 1)
