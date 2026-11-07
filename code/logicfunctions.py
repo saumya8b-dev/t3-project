@@ -1,6 +1,6 @@
 import random
 import helpers as h
-
+import math
 
 def pretend_semesters(professor, miss_classes):
     '''This function simulates 1000 pretend versions of a semester
@@ -92,8 +92,8 @@ def recover(attended, held, total, min_p): #no. of classes needed to recover to 
     x = math.ceil((p * held - attended) / (1 - p) - 0.00000001) #subtracted so that a number like 2.000000001 doesnt get round up to 3
     return (x, True) if x <= remaining else (x, False) #true/false to know if the student can recover from it or not
 
-def future_attendance(attended,left,leave_days,total):
-    to_attend=left-leave
+def future_attendance_pct(attended,left,leave_days,total):
+    to_attend=left-leave_days
     return 100*(to_attend)/total
 
 def safe_or_risky(risk, limit,future_attendance):
@@ -104,7 +104,7 @@ def safe_or_risky(risk, limit,future_attendance):
 def what_if(classes_attended, classes_held, total_classes, leave_days, tests_expected):
     classes_left = total_classes - classes_held
     # chance that a surprise test falls on a class you miss
-    risk = risk_factor_simulation(classes_held, total_classes, leave_days, tests_expected)
+    risk = simulate_risk_factor(classes_held, total_classes, leave_days, tests_expected)
     # attendance % at the end if you attend everything except the leave days
     future_attendance = 100 * (classes_attended + classes_left - leave_days) / total_classes
     return risk, future_attendance
