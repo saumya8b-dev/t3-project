@@ -49,9 +49,28 @@ _levels= list(strictness)
 def current_attendance(attended, held):
     return (100.0 * attended)/(held)
     
-def risk_factor_simulation(classes_held, total_classes, leaves, m, total_semesters=1000):
-    remaining= total_classes-classes_held
-    ------ (left to be written) #risk factor
+def simulate_risk_factor(classes_so_far, total_classes, leave_days, tests_expected):
+    classes_left = total_classes - classes_so_far
+    tests_expected = min(tests_expected, classes_left) #to prevent more tests than there are classes left
+    
+    if classes_left <= 0 or leave_days <= 0 or tests_expected <= 0:
+        return 0
+        
+    next_class = classes_so_far + 1
+    last_class = total_classes
+
+    # the classes you will miss i.e. from the next class
+    last_missed_class = min(classes_so_far + leave_days, total_classes) #for a continous leave
+    missed_classes = list(range(next_class, last_missed_class + 1)) #gives missed classes in a list
+
+    total_simulations = 1000
+    risky_count = 0
+    for i in range(total_simulations):
+        test_days = h.random_unique(tests_expected, next_class, last_class + 1)
+        if h.compare_two_lists(test_days, missed_classes):
+            risky_count += 1
+
+    return risky_count / total_simulations
     
 def classify_attendance_risk(p, min_p):
     if p >= min_p:
