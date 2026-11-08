@@ -151,9 +151,7 @@ def gui():
         verdict = lf.safe_or_risky(risk, future_pct, min_pct, risk_threshold)
 
         r1, r2, r3 = st.columns(3)
-        with r1:
-        st.markdown("<p style='color: black; margin: 0; font-size: 14px;'>Chance a test hits your leave</p>", unsafe_allow_html=True)
-        st.markdown(f"<p style='color: black; margin: 0; font-size: 28px; font-weight: bold;'>{risk * 100:.1f}%</p>", unsafe_allow_html=True)
+        r1.metric("Chance a test hits your leave", f"{risk * 100:.1f}%")
         r2.metric("Final attendance after leave", f"{future_pct:.1f}%")
         r3.metric("Verdict", verdict)
 
