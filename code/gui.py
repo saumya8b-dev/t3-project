@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 
 import logicfunctions as lf
@@ -33,22 +32,6 @@ def gui():
         .header-anchor-link, [data-testid="stHeaderAnchor"] {
                 display: none !important;
                 }
-
-        /* metric labels + values */
-        [data-testid="stMetricLabel"], [data-testid="stMetricLabel"] *,
-        [data-testid="stMetricValue"], [data-testid="stMetricValue"] * {
-            color: black !important;
-        }
-
-        /* normal text, expander header, table cells */
-        [data-testid="stMain"] .stMarkdown p,
-        [data-testid="stMain"] .stMarkdown li,
-        [data-testid="stExpander"] summary,
-        [data-testid="stExpander"] summary *,
-        [data-testid="stTable"] th,
-        [data-testid="stTable"] td {
-            color: black !important;
-        }
         </style>
         """,
         unsafe_allow_html=True, #to render html and css
@@ -110,12 +93,6 @@ def gui():
         storage.add_course(course, courses)
         storage.save_data(courses)
 
-    def colour_verdict(v):
-        """Green for Safe, red for anything else (used by the what-if table)."""
-        if v == "Safe":
-            return "color: green !important; font-weight: 600;"
-        return "color: red !important; font-weight: 600;"
-
     def render_analytics(course_name, total_classes, min_attendance_pct, professor_strictness,
                          classes_attended, classes_missed, leave_days):
         """All the calculations/results for the selected course."""
@@ -176,18 +153,7 @@ def gui():
         r1, r2, r3 = st.columns(3)
         r1.metric("Chance a test hits your leave", f"{risk * 100:.1f}%")
         r2.metric("Final attendance after leave", f"{future_pct:.1f}%")
-
-        # Custom HTML because st.metric can't colour its value
-        verdict_color = "green" if verdict == "Safe" else "red"
-        r3.markdown(
-            f"""
-            <div style="color: black; font-size: 14px;">Verdict</div>
-            <div style="color: {verdict_color}; font-size: 2.25rem; font-weight: 600; line-height: 1.2;">
-                {verdict}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        r3.metric("Verdict", verdict)
 
         if verdict == "Safe":
             st.success(f"Taking {leave_days} day(s) off looks safe.")
@@ -229,17 +195,13 @@ def gui():
                 lf.what_if_sick_in_quiz_week(attended, held, total_classes, tests_expected, min_pct,
                                              leave_days, int(quiz_len), risk_threshold),
             ]
-            df = pd.DataFrame([
+            st.table([
                 {"Scenario": name,
                  "Test risk": f"{rk * 100:.1f}%",
                  "Final attendance": f"{fa:.1f}%",
                  "Verdict": vd}
                 for name, rk, fa, vd in rows
             ])
-            # pandas >= 2.1 uses Styler.map; older versions use Styler.applymap
-            styler = df.style
-            style_fn = styler.map if hasattr(styler, "map") else styler.applymap
-            st.table(style_fn(colour_verdict, subset=["Verdict"]))
 
     def main():
         initialize_session_state()
