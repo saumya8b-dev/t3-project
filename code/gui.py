@@ -32,6 +32,14 @@ def gui():
         .header-anchor-link, [data-testid="stHeaderAnchor"] {
                 display: none !important;
                 }
+        [data-testid="stMetricLabel"] p {
+            color: black !important;
+            font-weight: 600 !important;
+        }
+        [data-testid="stMetricValue"] {
+            color: black !important;
+        }
+    
         </style>
         """,
         unsafe_allow_html=True, #to render html and css
