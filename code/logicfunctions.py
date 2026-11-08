@@ -2,14 +2,16 @@ import random
 import helpers as h
 import math
 
+
 def pretend_semesters(professor, miss_classes):
     '''This function simulates 1000 pretend versions of a semester
     and rolls a surprise test or activity in m assessment days.
     If any one of them happens in a missed class, that pretend semester counts as a risky one.
     risk factor = number of risky semesters / total semesters
-    if the risk factor is greater than 10%, the student would be advised to not take the leaves. 
+    if the risk factor is greater than 10%, the student would be advised to not take the leaves.
     If the risk factor is less than 10%, the student would be advised to take the leaves.
     Assumption is that the user's leave will start next class onwards and will go for n days
+    (Not used by the GUI; kept for reference.)
     '''
     n = miss_classes
     risky_semesters = 0
@@ -17,7 +19,6 @@ def pretend_semesters(professor, miss_classes):
     classes_so_far = professor.classes_so_far
     total_classes = professor.total_classes
     m = 5 #placeholder value for number of tests/activities expected in each semester
-    #depends on the number of classes left, how strict the professor is etc
     for i in range(total_semesters):
         try:
             test_activity_days = h.random_unique(m, classes_so_far + 1, total_classes + 1)
@@ -32,30 +33,34 @@ def pretend_semesters(professor, miss_classes):
 
     risk_factor = risky_semesters/total_semesters
     print(risk_factor)
-    #actual risk threshold will not be 0.1, but dependent on other factors like professor strictness and attendance frequency
     risk_threshold = 0.1
     if risk_factor >= risk_threshold:
         print('Too risky to miss class')
     else:
         print('Missing class is mostly safe')
-        
+
+
 strictness = {
     "Lenient professor":  {"m": 3, "threshold": 0.20}, #threshold-> max risk that could be taken
     "Moderate professor": {"m": 5, "threshold": 0.10},
     "Strict professor":   {"m": 8, "threshold": 0.05},
 }
-_levels= list(strictness)
+_levels = list(strictness)
+
 
 def current_attendance(attended, held):
-    return (100.0 * attended)/(held)
-    
+    if held <= 0:
+        return 100.0
+    return (100.0 * attended) / held
+
+
 def simulate_risk_factor(classes_so_far, total_classes, leave_days, tests_expected):
     classes_left = total_classes - classes_so_far
     tests_expected = min(tests_expected, classes_left) #to prevent more tests than there are classes left
-    
+
     if classes_left <= 0 or leave_days <= 0 or tests_expected <= 0:
         return 0
-        
+
     next_class = classes_so_far + 1
     last_class = total_classes
 
@@ -71,7 +76,8 @@ def simulate_risk_factor(classes_so_far, total_classes, leave_days, tests_expect
             risky_count += 1
 
     return risky_count / total_simulations
-    
+
+
 def classify_attendance_risk(p, min_p):
     if p >= min_p:
         return "Safe"
@@ -81,8 +87,9 @@ def classify_attendance_risk(p, min_p):
     if diff <= 10:
         return "Moderate"   # 65-72.99
     return "High"           # below 65
-    
-def recover(attended, held, total, min_p): #no. of classes needed to recover to 75%
+
+
+def recover(attended, held, total, min_p): #no. of classes needed to recover to min_p%
     p = min_p / 100
     remaining = total - held
     if held == 0 or attended / held >= p:
@@ -92,15 +99,27 @@ def recover(attended, held, total, min_p): #no. of classes needed to recover to 
     x = math.ceil((p * held - attended) / (1 - p) - 0.00000001) #subtracted so that a number like 2.000000001 doesnt get round up to 3
     return (x, True) if x <= remaining else (x, False) #true/false to know if the student can recover from it or not
 
-def future_attendance_pct(attended,left,leave_days,total):
-    to_attend=left-leave_days
-    return 100*(to_attend)/total
 
-def safe_or_risky(risk, limit,future_attendance):
-    if future_attendance<75:
+def future_attendance_pct(attended, classes_so_far, total, leave_days):
+    """Attendance % at the end of the course if the student attends every
+    remaining class except `leave_days` of them."""
+    if total <= 0:
+        return 0.0
+    classes_left = max(total - classes_so_far, 0)
+    leave_days = min(leave_days, classes_left)
+    return 100.0 * (attended + classes_left - leave_days) / total
+
+
+def safe_or_risky(risk, future_attendance, min_attendance_pct, risk_threshold=0.10):
+    """Risky if the final attendance drops below the minimum, or the chance
+    that a surprise test lands on a missed class is above the threshold."""
+    if future_attendance < min_attendance_pct:
+        return "Risky"
+    if risk > risk_threshold:
         return "Risky"
     return "Safe"
-    
+
+
 def what_if(classes_attended, classes_held, total_classes, leave_days, tests_expected):
     classes_left = total_classes - classes_held
     # chance that a surprise test falls on a class you miss
@@ -111,7 +130,7 @@ def what_if(classes_attended, classes_held, total_classes, leave_days, tests_exp
 
 
 def what_if_flu(classes_attended, classes_so_far, total_classes, tests_expected,
-                min_attendance_pct, leave_days):
+                min_attendance_pct, leave_days, risk_threshold=0.10):
     classes_left = total_classes - classes_so_far
     future_classes = list(range(classes_so_far + 1, total_classes + 1))
     leave_days = min(leave_days, classes_left)
@@ -124,17 +143,17 @@ def what_if_flu(classes_attended, classes_so_far, total_classes, tests_expected,
             start = random.randint(0, classes_left - leave_days) #This picks where the flu starts, as a position in the list
             missed_classes = future_classes[start:start + leave_days] #This cuts a slice out of the list of the classes you missed
             test_days = random.sample(future_classes, tests) #picks random test days
-            if set(missed_classes) & set(test_days): #converts to set and takes intersection 
+            if set(missed_classes) & set(test_days): #converts to set and takes intersection
                 risky_count += 1
     risk = risky_count / total_simulations
 
     future_attendance = future_attendance_pct(classes_attended, classes_so_far, total_classes, leave_days)
     return (f"{leave_days}-day flu", risk, future_attendance,
-            safe_or_risky(risk, future_attendance, min_attendance_pct))
+            safe_or_risky(risk, future_attendance, min_attendance_pct, risk_threshold))
 
 
 def what_if_professor_gets_strict(classes_attended, classes_so_far, total_classes, tests_expected, #same as flu but with tests on random days
-                                  min_attendance_pct, leave_days, max_extra_tests):
+                                  min_attendance_pct, leave_days, max_extra_tests, risk_threshold=0.10):
     classes_left = total_classes - classes_so_far
     future_classes = list(range(classes_so_far + 1, total_classes + 1))
     leave_days = min(leave_days, classes_left)
@@ -154,12 +173,12 @@ def what_if_professor_gets_strict(classes_attended, classes_so_far, total_classe
 
     future_attendance = future_attendance_pct(classes_attended, classes_so_far, total_classes, leave_days)
     return ("Professor gets strict", risk, future_attendance,
-            safe_or_risky(risk, future_attendance, min_attendance_pct))
+            safe_or_risky(risk, future_attendance, min_attendance_pct, risk_threshold))
 
 
 # 3) Classes cancelled: the user chooses how many are cancelled and the leave
 def what_if_classes_cancelled(classes_attended, classes_so_far, total_classes, tests_expected,
-                              min_attendance_pct, cancelled_classes, leave_days):
+                              min_attendance_pct, cancelled_classes, leave_days, risk_threshold=0.10):
     new_total_classes = total_classes - cancelled_classes
     future_classes = list(range(classes_so_far + 1, total_classes + 1))
 
@@ -167,7 +186,7 @@ def what_if_classes_cancelled(classes_attended, classes_so_far, total_classes, t
     risky_count = 0
     if len(future_classes) > cancelled_classes:
         for i in range(total_simulations):
-            cancelled = random.sample(future_classes, cancelled_classes) #picks 2 different random classes to cancel
+            cancelled = random.sample(future_classes, cancelled_classes) #picks random different classes to cancel
             open_classes = [c for c in future_classes if c not in cancelled] #not cancelled
             days_off = min(leave_days, len(open_classes))
             tests = min(tests_expected, len(open_classes))
@@ -178,18 +197,20 @@ def what_if_classes_cancelled(classes_attended, classes_so_far, total_classes, t
                 risky_count += 1
     risk = risky_count / total_simulations
 
-    future_attendance = future_attendance_pct(classes_attended, classes_so_far, new_total_classes, leave_days)
+    # cancelled classes shrink the total; the leave can't exceed the classes still held
+    effective_leave = min(leave_days, max(new_total_classes - classes_so_far, 0))
+    future_attendance = future_attendance_pct(classes_attended, classes_so_far, new_total_classes, effective_leave)
     return (f"{cancelled_classes} classes cancelled", risk, future_attendance,
-            safe_or_risky(risk, future_attendance, min_attendance_pct))
+            safe_or_risky(risk, future_attendance, min_attendance_pct, risk_threshold))
 
 
 # 4) Sick in quiz week: the user chooses the sick days and the quiz week length
 def what_if_sick_in_quiz_week(classes_attended, classes_so_far, total_classes, tests_expected,
-                              min_attendance_pct, leave_days, quiz_week_length):
+                              min_attendance_pct, leave_days, quiz_week_length, risk_threshold=0.10):
     classes_left = total_classes - classes_so_far
     future_classes = list(range(classes_so_far + 1, total_classes + 1))
     leave_days = min(leave_days, classes_left)
-    quiz_week_length = min(quiz_week_length, classes_left)
+    quiz_week_length = max(1, min(quiz_week_length, classes_left))
     tests = min(tests_expected, classes_left)
 
     total_simulations = 1000
@@ -204,12 +225,11 @@ def what_if_sick_in_quiz_week(classes_attended, classes_so_far, total_classes, t
             sick_start = random.randint(week_start, last_start)
             missed_classes = future_classes[sick_start:sick_start + leave_days]
 
-            test_days = random.sample(future_classes, tests)   
+            test_days = random.sample(future_classes, tests)
             if quiz_day in missed_classes or set(missed_classes) & set(test_days):
                 risky_count += 1
     risk = risky_count / total_simulations
 
     future_attendance = future_attendance_pct(classes_attended, classes_so_far, total_classes, leave_days)
     return (f"Sick {leave_days} days in quiz week", risk, future_attendance,
-            safe_or_risky(risk, future_attendance, min_attendance_pct))
-
+            safe_or_risky(risk, future_attendance, min_attendance_pct, risk_threshold))

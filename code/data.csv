@@ -1,4 +1,2 @@
 name,strictness_factor,attendance_frequency,total_classes,classes_so_far,attended_classes,attendance_threshold
-HS102,0.6,0.7,10,1,1,0.75
-PH101,0.5,0.5,10,1,1,0.75
-CH101,0.6,1.0,10,1,1,0.75
+CS101,1.0,0.0,100,15,14,0.75
