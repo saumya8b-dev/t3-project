@@ -32,6 +32,39 @@ def gui():
         .header-anchor-link, [data-testid="stHeaderAnchor"] {
                 display: none !important;
                 }
+        /* force light rendering even if the browser/OS is in dark mode */
+        :root, .stApp { color-scheme: light !important; }
+        /* catch-all: any text that isn't covered below stays black */
+        .stApp, .stApp *, [data-testid="stSidebar"] * { color: black !important; }
+        .stApp input::placeholder { color: #777 !important; }
+        /* buttons (sidebar course buttons + save button): light background, dark text */
+        .stButton > button, [data-testid^="stBaseButton"], [data-testid="stSidebar"] button {
+            background-color: #fff3e0 !important;
+            border: 1px solid #e68a00 !important;
+            border-radius: 8px !important;
+        }
+        .stButton > button:hover, [data-testid^="stBaseButton"]:hover, [data-testid="stSidebar"] button:hover {
+            background-color: #ffd699 !important;
+            border-color: #cc7a00 !important;
+        }
+        .stButton > button:active, [data-testid^="stBaseButton"]:active { background-color: #ffb347 !important; }
+        /* number input +/- stepper buttons */
+        [data-testid="stNumberInput"] button { background-color: #fff3e0 !important; }
+        /* keep all normal text dark on the light background (Streamlit's dark mode makes it white) */
+        .stApp p, .stApp li, .stApp label, .stApp label p,
+        .stApp [data-testid="stMarkdownContainer"] p,
+        [data-testid="stMetricLabel"], [data-testid="stMetricLabel"] *,
+        [data-testid="stMetricValue"], [data-testid="stMetricValue"] *,
+        [data-testid="stExpander"] summary, [data-testid="stExpander"] summary *,
+        [data-testid="stTable"] th, [data-testid="stTable"] td {
+            color: black !important;
+        }
+        [data-testid="stExpander"] { background-color: #fff3e0; border-radius: 8px; }
+        /* inputs: dark text on a white box */
+        .stApp input, .stApp textarea { color: black !important; background-color: white !important; }
+        .stApp input::placeholder { color: #777 !important; }
+        div[data-baseweb="select"] > div { background-color: white !important; }
+        [data-testid="stTable"] table { background-color: #fff3e0; }
         </style>
         """,
         unsafe_allow_html=True, #to render html and css
