@@ -33,6 +33,21 @@ def load_data(L, Course):
             L.append(Course(**i))
 
 
+def load_course(name):
+    """Return the saved Course whose name matches `name`, or None if there
+    is no saved data for it (missing file, empty file, or course not saved)."""
+    from models import Course  # imported here to keep storage.py independent of models at import time
+    courses = []
+    try:
+        load_data(courses, Course)
+    except (OSError, ValueError, TypeError, KeyError):
+        return None
+    for c in courses:
+        if c.name == name:
+            return c
+    return None
+
+
 def add_course(course, L):
     """Add a course, replacing any existing one with the same name."""
     for idx, existing in enumerate(L):

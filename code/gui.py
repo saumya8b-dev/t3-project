@@ -82,15 +82,7 @@ def gui():
 
     def load_saved_course(name):
         """Returns the saved Course for `name`, or None."""
-        courses = []
-        try:
-            storage.load_data(courses, Course)
-        except (OSError, ValueError, TypeError):
-            return None
-        for c in courses:
-            if c.name == name:
-                return c
-        return None
+        return storage.load_course(name)
 
     def save_course(course):
         courses = []
