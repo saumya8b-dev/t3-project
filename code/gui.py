@@ -39,6 +39,9 @@ def gui():
         [data-testid="stMetricValue"] {
             color: black !important;
         }
+        [data-testid="stMetricValue"] {
+            color: black !important;
+        }
     
         </style>
         """,
