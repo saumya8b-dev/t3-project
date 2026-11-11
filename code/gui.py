@@ -38,6 +38,29 @@ def gui():
         /* catch-all: any text that isn't covered below stays black */
         .stApp, .stApp *, [data-testid="stSidebar"] * { color: black !important; }
         .stApp input::placeholder { color: #777 !important; }
+        
+        /* FIX: Input boxes border styling to remove harsh black borders and match theme */
+        .stApp input, .stApp textarea { 
+            color: black !important; 
+            background-color: white !important; 
+            border: 1px solid #e68a00 !important;
+            border-radius: 8px !important;
+        }
+        .stApp input:focus, .stApp textarea:focus {
+            border-color: #cc7a00 !important;
+            box-shadow: 0 0 0 1px #cc7a00 !important;
+        }
+        div[data-baseweb="select"] > div { 
+            background-color: white !important; 
+            border: 1px solid #e68a00 !important;
+            border-radius: 8px !important;
+        }
+        [data-testid="stNumberInput"] > div > div {
+            border: 1px solid #e68a00 !important;
+            border-radius: 8px !important;
+            background-color: white !important;
+        }
+
         /* buttons (sidebar course buttons + save button): light background, dark text */
         .stButton > button, [data-testid^="stBaseButton"], [data-testid="stSidebar"] button {
             background-color: #fff3e0 !important;
@@ -61,10 +84,6 @@ def gui():
             color: black !important;
         }
         [data-testid="stExpander"] { background-color: #fff3e0; border-radius: 8px; }
-        /* inputs: dark text on a white box */
-        .stApp input, .stApp textarea { color: black !important; background-color: white !important; }
-        .stApp input::placeholder { color: #777 !important; }
-        div[data-baseweb="select"] > div { background-color: white !important; }
         [data-testid="stTable"] table { background-color: #fff3e0; }
         </style>
         """,
@@ -328,9 +347,9 @@ def gui():
                 lf.what_if_professor_gets_strict(attended, held, total_classes, tests_expected, min_pct,
                                                  leave_days, int(max_extra), risk_threshold),
                 lf.what_if_classes_cancelled(attended, held, total_classes, tests_expected, min_pct,
-                                             int(cancelled), leave_days, risk_threshold),
+                                           int(cancelled), leave_days, risk_threshold),
                 lf.what_if_sick_in_quiz_week(attended, held, total_classes, tests_expected, min_pct,
-                                             leave_days, int(quiz_len), risk_threshold),
+                                           leave_days, int(quiz_len), risk_threshold),
             ]
             st.table([
                 {"Scenario": name,
