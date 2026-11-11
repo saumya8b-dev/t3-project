@@ -1,4 +1,5 @@
 import streamlit as st
+import matplotlib.pyplot as plt
 
 import logicfunctions as lf
 import storage
@@ -126,6 +127,55 @@ def gui():
         storage.add_course(course, courses)
         storage.save_data(courses)
 
+    # ---- GRAPH 1 FUNCTION: Attendance Over the Rest of the Course ----
+    def plot_attendance_projection(x_classes, y_lines):
+        plt.figure(figsize=(8, 4))
+
+        plt.plot(x_classes, y_lines["no_leave"], label="Attend all remaining", color="green", marker="o")
+        plt.plot(x_classes, y_lines["with_leave"], label="With planned leave", color="orange", marker="o")
+        plt.plot(x_classes, y_lines["min_req"], label="Minimum required", color="red", linestyle="--")
+
+        plt.title("Attendance Over the Rest of the Course")
+        plt.xlabel("Class Number")
+        plt.ylabel("Attendance (%)")
+        plt.ylim(0, 105)
+        plt.grid(True)
+        plt.legend()
+
+        st.pyplot(plt)
+
+    # ---- GRAPH 2 FUNCTION: Leave Days vs. Final Attendance ----
+    def plot_leave_vs_attendance(x_leave, y_lines):
+        plt.figure(figsize=(6, 4))
+
+        plt.plot(x_leave, y_lines["final_att"], label="Final attendance", color="blue", marker="o")
+        plt.plot(x_leave, y_lines["min_req"], label="Minimum required", color="red", linestyle="--")
+
+        plt.title("Leave Days vs. Final Attendance")
+        plt.xlabel("Leave Days (Classes Skipped)")
+        plt.ylabel("Final Attendance (%)")
+        plt.ylim(0, 105)
+        plt.grid(True)
+        plt.legend()
+
+        st.pyplot(plt)
+
+    # ---- GRAPH 3 FUNCTION: Leave Days vs. Test Risk ----
+    def plot_leave_vs_risk(x_leave, y_lines):
+        plt.figure(figsize=(6, 4))
+
+        plt.plot(x_leave, y_lines["test_risk"], label="Chance of surprise test", color="purple", marker="o")
+        plt.plot(x_leave, y_lines["risk_limit"], label="Professor risk threshold", color="red", linestyle="--")
+
+        plt.title("Leave Days vs. Test Risk")
+        plt.xlabel("Leave Days (Classes Skipped)")
+        plt.ylabel("Test Risk (%)")
+        plt.ylim(0, 105)
+        plt.grid(True)
+        plt.legend()
+
+        st.pyplot(plt)
+
     def render_analytics(course_name, total_classes, min_attendance_pct, professor_strictness,
                          classes_attended, classes_missed, leave_days):
         """All the calculations/results for the selected course."""
@@ -208,6 +258,60 @@ def gui():
             else:
                 break
         st.write(f"**Safe leave count:** about **{max_safe}** class(es) from the next class onwards.")
+
+        # ---- GRAPH 1 DATA & CALL ----
+        x_classes = list(range(held, total_classes + 1))
+
+        y_no_leave = []
+        y_with_leave = []
+        y_min_req = []
+
+        for step, c in enumerate(x_classes):
+            y_no_leave.append(((attended + step) / c) * 100)
+            y_with_leave.append(((attended + max(0, step - leave_days)) / c) * 100)
+            y_min_req.append(min_pct)
+
+        y_lines_g1 = {
+            "no_leave": y_no_leave,
+            "with_leave": y_with_leave,
+            "min_req": y_min_req
+        }
+
+        plot_attendance_projection(x_classes, y_lines_g1)
+
+        # ---- GRAPH 2 & GRAPH 3 DATA & SIDE-BY-SIDE CALL ----
+        x_leave_days = list(range(0, classes_left + 1))
+
+        y_final_att = []
+        y_min_att_line = []
+        y_test_risk = []
+        y_risk_limit_line = []
+
+        for d in x_leave_days:
+            # Final attendance % if skipping d classes
+            y_final_att.append(lf.future_attendance_pct(attended, held, total_classes, d))
+            y_min_att_line.append(min_pct)
+
+            # Test risk % if skipping d classes (0% risk if skipping 0 days)
+            r_val = 0.0 if d == 0 else lf.simulate_risk_factor(held, total_classes, d, tests_expected)
+            y_test_risk.append(r_val * 100)
+            y_risk_limit_line.append(risk_threshold * 100)
+
+        y_lines_g2 = {
+            "final_att": y_final_att,
+            "min_req": y_min_att_line
+        }
+
+        y_lines_g3 = {
+            "test_risk": y_test_risk,
+            "risk_limit": y_risk_limit_line
+        }
+
+        g_col1, g_col2 = st.columns(2)
+        with g_col1:
+            plot_leave_vs_attendance(x_leave_days, y_lines_g2)
+        with g_col2:
+            plot_leave_vs_risk(x_leave_days, y_lines_g3)
 
         # ---- what-if scenarios ----
         with st.expander("What-if scenarios"):
