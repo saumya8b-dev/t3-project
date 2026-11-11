@@ -127,55 +127,49 @@ courses = []
 storage.add_course(course, courses)
 storage.save_data(courses)
 
-    # ---- GRAPH 1 FUNCTION: Attendance Over the Rest of the Course ----
-    def plot_attendance_projection(x_classes, y_lines):
-        plt.figure(figsize=(8, 4))
+# ---- GRAPH 1 FUNCTION ----
+def plot_attendance_projection(x_classes, y_lines):
+    plt.figure(figsize=(8, 4))
+    plt.plot(x_classes, y_lines["no_leave"], label="Attend all remaining", color="green", marker="o")
+    plt.plot(x_classes, y_lines["with_leave"], label="With planned leave", color="orange", marker="o")
+    plt.plot(x_classes, y_lines["min_req"], label="Minimum required", color="red", linestyle="--")
+    plt.title("Attendance Over the Rest of the Course")
+    plt.xlabel("Class Number")
+    plt.ylabel("Attendance (%)")
+    plt.ylim(0, 105)
+    plt.grid(True)
+    plt.legend()
+    st.pyplot(plt)
+    plt.close() # Good practice to close the figure to prevent memory overlap in Streamlit
 
-        plt.plot(x_classes, y_lines["no_leave"], label="Attend all remaining", color="green", marker="o")
-        plt.plot(x_classes, y_lines["with_leave"], label="With planned leave", color="orange", marker="o")
-        plt.plot(x_classes, y_lines["min_req"], label="Minimum required", color="red", linestyle="--")
+# ---- GRAPH 2 FUNCTION ----
+def plot_leave_vs_attendance(x_leave, y_lines):
+    plt.figure(figsize=(6, 4))
+    plt.plot(x_leave, y_lines["final_att"], label="Final attendance", color="blue", marker="o")
+    plt.plot(x_leave, y_lines["min_req"], label="Minimum required", color="red", linestyle="--")
+    plt.title("Leave Days vs. Final Attendance")
+    plt.xlabel("Leave Days (Classes Skipped)")
+    plt.ylabel("Final Attendance (%)")
+    plt.ylim(0, 105)
+    plt.grid(True)
+    plt.legend()
+    st.pyplot(plt)
+    plt.close()
 
-        plt.title("Attendance Over the Rest of the Course")
-        plt.xlabel("Class Number")
-        plt.ylabel("Attendance (%)")
-        plt.ylim(0, 105)
-        plt.grid(True)
-        plt.legend()
-
-        st.pyplot(plt)
-
-    # ---- GRAPH 2 FUNCTION: Leave Days vs. Final Attendance ----
-    def plot_leave_vs_attendance(x_leave, y_lines):
-        plt.figure(figsize=(6, 4))
-
-        plt.plot(x_leave, y_lines["final_att"], label="Final attendance", color="blue", marker="o")
-        plt.plot(x_leave, y_lines["min_req"], label="Minimum required", color="red", linestyle="--")
-
-        plt.title("Leave Days vs. Final Attendance")
-        plt.xlabel("Leave Days (Classes Skipped)")
-        plt.ylabel("Final Attendance (%)")
-        plt.ylim(0, 105)
-        plt.grid(True)
-        plt.legend()
-
-        st.pyplot(plt)
-
-    # ---- GRAPH 3 FUNCTION: Leave Days vs. Test Risk ----
-    def plot_leave_vs_risk(x_leave, y_lines):
-        plt.figure(figsize=(6, 4))
-
-        plt.plot(x_leave, y_lines["test_risk"], label="Chance of surprise test", color="purple", marker="o")
-        plt.plot(x_leave, y_lines["risk_limit"], label="Professor risk threshold", color="red", linestyle="--")
-
-        plt.title("Leave Days vs. Test Risk")
-        plt.xlabel("Leave Days (Classes Skipped)")
-        plt.ylabel("Test Risk (%)")
-        plt.ylim(0, 105)
-        plt.grid(True)
-        plt.legend()
-
-        st.pyplot(plt)
-
+# ---- GRAPH 3 FUNCTION ----
+def plot_leave_vs_risk(x_leave, y_lines):
+    plt.figure(figsize=(6, 4))
+    plt.plot(x_leave, y_lines["test_risk"], label="Chance of surprise test", color="purple", marker="o")
+    plt.plot(x_leave, y_lines["risk_limit"], label="Professor risk threshold", color="red", linestyle="--")
+    plt.title("Leave Days vs. Test Risk")
+    plt.xlabel("Leave Days (Classes Skipped)")
+    plt.ylabel("Test Risk (%)")
+    plt.ylim(0, 105)
+    plt.grid(True)
+    plt.legend()
+    st.pyplot(plt)
+    plt.close()
+    
 def render_analytics(course_name, total_classes, min_attendance_pct, professor_strictness,
 classes_attended, classes_missed, leave_days):
 """All the calculations/results for the selected course."""
