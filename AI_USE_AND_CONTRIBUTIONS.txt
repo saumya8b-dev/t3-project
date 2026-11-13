@@ -1,4 +1,26 @@
 AI USE:
 1)brainstorming basic idea of our project
+2)summary of the project
+3)bug fixing
 
-CONTRIBUTIONS:
+CONTRIBUTIONS(names in alphabetical order):
+Main programming of the project:
+Rizan
+Saumya
+Toshier
+
+Presentation slides:
+Vaishnavi
+
+Report:
+Abhinav
+Manjeet
+Sumanth  
+Vastal
+
+Speaking:
+Bhairavi
+Smaayan 
+
+Demo:
+Tarun
